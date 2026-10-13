@@ -119,3 +119,7 @@ On Apollo 11 this turned out to be fitting. Armstrong flew past the planned spot
 The antenna-check loop at `THE_LUNAR_LANDING.agc:239-255` (`P63SPOT3` through `P63SPOT4`). That includes the "CRANK THE SILLY THING AROUND" request and the three ways the crew can answer it.
 
 The file for this rewritten login is in [`p63-antenna-check.mjs`](p63-antenna-check.mjs).
+
+In the original, when the astronaut presses PROCEED, TCF P63SPOT3 jumps back and reads channel 33 again. The computer doesn't accept "I moved it" on its own. In p63-antenna-check.mjs, PROCEED runs continue, which goes back to the top of the loop and calls readChannel33() & BIT6 again. The program can only move on when the hardware actually shows position 1.
+
+However, there is a gap in the 2026 version. Any answer other than TERMINATE or PROCEED is treated as ENTER, which skips the check. So a typo like "proceed" or an undefined from the display handler would bypass it with no error. The original can't do this, because there are only three possible answers. To close the gap, the function should break only on "ENTER" and throw an error on anything else.
